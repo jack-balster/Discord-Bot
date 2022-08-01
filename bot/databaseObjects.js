@@ -1,3 +1,5 @@
+//all database objects used to interact with the models
+
 const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize('discordbot', 'username', 'password', {
