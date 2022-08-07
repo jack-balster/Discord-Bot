@@ -13,13 +13,13 @@ client.once('ready', () => {
 })
 
 //creates message "pong" to respond when a user types "ping" (makes sure I can interact with the bot)
-client.on('messageCreate', (message) => {
-    if(message.author.id === client.user.id) return; //make sure bot doesn't respond to itself
+//client.on('messageCreate', (message) => {
+  //  if(message.author.id === client.user.id) return; //make sure bot doesn't respond to itself
 
-    if(message.content === "ping") {
-        message.reply("pong");
-    }
-})
+    //if(message.content === "ping") {
+     //   message.reply("pong");
+    //}
+//})
 
 
 /* tictactoe */
@@ -29,10 +29,29 @@ let BOT = Symbol("bot");
 
 let tictactoe_state //global
 
-//makes grid with clickable buttons for interactive gameplay
+//on client interaction
+client.on('interactionCreate', async interaction => {
+    //checks if interaction is a command then runs
+    if(!interaction.isCommand()) return;
+
+//if command is tictactoe then run code
+    const { commandName } = interaction;
+//create gameboard
+    if (commandName === 'tictactoe') {
+        tictactoe_state = [
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY]
+        ]
+//message displayed in discord server while command is running
+        await interaction.reply({ content: "Playing a game of tictactoe", components: makeGrid() });
+    }
+})
+
+//makes grid with clickable buttons for interactive gameplay (fills arrays)
 function makeGrid() {
     components = []
-    //loop through grid so that it's 3x3
+    //loop through arrays so that it matches 3x3
     for (let row = 0; row < 3; row++) {
         actionRow = new MessageActionRow()
 
@@ -86,7 +105,7 @@ function isDraw() {
     return true;
 }
 
-//function to determine if the game is over via win or lose
+//function to determine if the game is over via win or lose (3 in a row)
 function isGameOver() {
     for (let i = 0; i < 3; i++) {
         //checking horizontally for 3 in a row
@@ -155,7 +174,6 @@ client.on('interactionCreate', async interaction => {
         return;
     }
 
-
 /* Bot functionality */
     let botRow
     let botCol
@@ -167,7 +185,7 @@ client.on('interactionCreate', async interaction => {
 
     tictactoe_state[botRow][botCol] = BOT;
 
-    if (isGameOver()) { //check if game is over on bot move
+    if (isGameOver()) { //check if game is over on bot move (bot won)
         interaction.update({
             content: "You lost :(",
             components: makeGrid()
@@ -183,29 +201,11 @@ client.on('interactionCreate', async interaction => {
     }
 /* End bot functionality*/
 
-//update the board based on current interaction (using the makeGrid function to generate the board again)
+//update the board based on current interaction (using the makeGrid function to generate the buttons again)
   interaction.update({
       components: makeGrid()
    })
 })
 
-//on client interaction
-client.on('interactionCreate', async interaction => {
-    //checks if interaction is a command then runs
-    if(!interaction.isCommand()) return;
-
-//if command is tictactoe then run code
-    const { commandName } = interaction;
-//create gameboard
-    if (commandName === 'tictactoe') {
-        tictactoe_state = [
-            [EMPTY, EMPTY, EMPTY],
-            [EMPTY, EMPTY, EMPTY],
-            [EMPTY, EMPTY, EMPTY]
-        ]
-//message displayed in discord server while command is running
-        await interaction.reply({ content: "Playing a game of tictactoe", components: makeGrid() });
-    }
-})
-
 client.login(token);
+
